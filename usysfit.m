@@ -185,8 +185,16 @@ function info = check_result(sys, usys, unames, info, opt)
 			else
 				n = 'gain';
 			end
-			fprintf('%s %s\n\tabs\trel\tsqrsum\n', mnames{kk}, n);
-			fprintf('\t%.4f\t%.4f\t%.4f\n', err_abs(kk), err_rel(kk), sqsum(kk));
+			fprintf('%s %s\n\tabs\t\trel\t\tsqrsum\n', mnames{kk}, n);
+			fprintf('\t%.4f\t', err_abs(kk));
+			if err_abs(kk) < 100
+				fprintf('\t');
+			end
+			fprintf('%.4f\t', err_rel(kk));
+			if err_rel(kk) < 100
+				fprintf('\t');
+			end
+			fprintf('%.4f\n', sqsum(kk));
 		end
 	end
 end
