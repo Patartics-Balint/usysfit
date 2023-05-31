@@ -183,51 +183,38 @@ function info = check_result(sys, usys, unames, info, opt)
 		sys_fit = usys;
 	end
 	mnames = {'a', 'b', 'c', 'd'};
-	err_abs = inf(4, 1);
-	err_rel = inf(4, 1);
 	sqsum = inf(4, 1);
+	sqsum_rel = inf(4, 1);
 	for kk = 1 : numel(mnames)
 		m = sys.(mnames{kk});
 		m_fit = sys_fit.(mnames{kk});
 		if ~isempty(m)
 			m_err = m - m_fit;
-			err_abs(kk) = max(abs(m_err(:)));
-			err_rel(kk) = err_abs(kk) / mean(abs(m(:)));
-			sqsum(kk) = sqrt(sum(abs(m_err(:).^2)));
+			sqsum(kk) = norm(m_err(:));
+			sqsum_rel(kk) = sqsum(kk) / norm(m(:));
 		else
-			err_abs(kk) = 0;
-			err_rel(kk) = 0;
 			sqsum(kk) = 0;
+			sqsum_rel(kk) = 0;
 		end
 	end
 	% check dc gains
 	dc = dcgain(sys);
 	dc_fit = dcgain(sys_fit);
 	dc_err = abs(dc - dc_fit);
-	err_abs(end + 1) = max(abs(dc_err(:)));
-	err_rel(end + 1) = err_abs(end) / mean(abs(dc_err(:)));
-	sqsum(end + 1) = sqrt(sum(abs(dc_err(:).^2)));
+	sqsum(end + 1) = norm(dc_err(:));
+	sqsum_rel(end + 1) = sqsum(end) / norm(dc(:));
 	mnames = [mnames, 'dc'];
+	fprintf('squared sum errors\n');
+	fprintf('matix\tabs.\t\trel.\n');
 	for kk = 1 : numel(mnames)
-		info.(mnames{kk}).abs_err = err_abs(kk);
-		info.(mnames{kk}).rel_err = err_rel(kk);
 		info.(mnames{kk}).sqsum = sqsum(kk);
+		info.(mnames{kk}).sqsum_rel = sqsum_rel(kk);
 		if opt.Display
-			if kk <= 4
-				n = 'matrix';
-			else
-				n = 'gain';
-			end
-			fprintf('%s %s\n\tabs\t\trel\t\tsqrsum\n', mnames{kk}, n);
-			fprintf('\t%.4f\t', err_abs(kk));
-			if err_abs(kk) < 100
+			fprintf('%s\t\t%.4f\t', mnames{kk}, sqsum(kk));
+			if sqsum(kk) < 100
 				fprintf('\t');
 			end
-			fprintf('%.4f\t', err_rel(kk));
-			if err_rel(kk) < 100
-				fprintf('\t');
-			end
-			fprintf('%.4f\n', sqsum(kk));
+			fprintf('%.4f\n', sqsum_rel(kk));
 		end
 	end
 end
