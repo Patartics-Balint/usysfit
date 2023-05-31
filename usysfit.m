@@ -5,10 +5,43 @@ function [usys, info] = usysfit(sys, base, opt)
 	%  usys = USYSFIT(sys, base, opt)
 	%Inputs:
 	%  sys: State-space array.
-	%  base: Cell array of function pointers of the form @(del)(...).
-	%	 opt: Option set created by usysfitOptions.
+	%  base: Cell array of function pointers of the form @(del)(...). The
+	%  argument 'del' is assumed to be a vector of parameter values. The
+	%  state-space matrices of usys are of the form A = A_1 * base{1} + A_2 *
+	%  base{2} + ...
+	%  opt: Option set created by usysfitOptions.
 	%Outputs:
-	%  usys: uss with parametric uncertainty.
+	%  usys: uss with parametric uncertainty. The name of the uncertain
+	%  parameters are taken from the parameter names in sys.SamplingGrid if
+	%  defined.
+	%Example:
+	% Load the example system.
+	% 	load('usysfit_example.mat');
+	% 	sys.SamplingGrid
+	% 		ans = 
+	% 		struct with fields:
+	% 			del_1: [7×5×3×9 double]
+	% 			del_2: [7×5×3×9 double]
+	% 			del_3: [7×5×3×9 double]
+	% 			del_4: [7×5×3×9 double]
+	%
+	% Fit an uncertain system using 1 as the only basis function.
+	% 	base = {@(del)(1)};
+	% 	usys = usysfit(sys_grid, base)
+	% 	usys =
+	% 		Uncertain continuous-time state-space model with 2 outputs, 3 inputs,
+	%			10 states, and no uncertain blocks.
+	%
+	% To improve accuracy, add del_1, del_2, del_3, and del_4 to the basis functions.
+	% 	base = {@(del)(1), @(del)(del(1)), @(del)(del(2)), @(del)(del(3)), @(del)(del(4))};
+	% 	usys = usysfit(sys_grid, base)
+	% 	usys = 
+	% 		Uncertain continuous-time state-space model with 2 outputs, 3 inputs, 10 states.
+	% 		The model uncertainty consists of the following blocks:
+	% 		del_1: Uncertain real, nominal = 0, range = [-1,1], 11 occurrences
+	% 		del_2: Uncertain real, nominal = 0, range = [-1,1], 10 occurrences
+	% 		del_3: Uncertain real, nominal = 0, range = [-1,1], 11 occurrences
+	% 		del_4: Uncertain real, nominal = 0, range = [-1,1], 11 occurrences
 	%
 	% See also usysfitOptions
 	if nargin < 3
