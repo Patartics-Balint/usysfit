@@ -3,6 +3,8 @@ classdef usysfitOptions
 	%
 	% opt = USYSFITOPTIONS returns the default options for the usysfit
 	% command.
+	%
+	% See also usysfit
 properties
 	Display = true;
 	Balreal = false;
